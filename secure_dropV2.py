@@ -12,12 +12,18 @@ import cryptocode
 import socket
 import json
 
+#could use a 2d array but I dont hate myself
+class contacts:
+    def __init__(self, contactNames, contactEmails):
+        self.contactNames = []
+        self.contactEmails =[]
+
 class user:
-    def __init__(user, name, email, password, salt):
-        user.name = name
-        user.email = email
-        user.password = password
-        user.salt = salt
+    def __init__(self, name, email, password, salt):
+        self.name = name
+        self.email = email
+        self.password = password
+        self.salt = salt
 
 def loadAccount():
     with open("accountfile.txt", "r") as jsonFile:
