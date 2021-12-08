@@ -141,57 +141,6 @@ def welcomeScreen():
         welcomeScreen()
 
 
-
-
-
-
-#Add user command which gives the user their own data file to store emails and contact names with a cryptocode encrypt funciton
-def add(userName, password):
-    # new contacts file for user
-    if os.path.exists('%s.txt' % userName) == False:
-        name = input("Enter Full Name: ")
-        emailAddress = input("Enter Email Address: ")
-        file = open('%s.txt' % userName, "a+")
-        file.write(name)
-        file.write("          ")
-        file.write(emailAddress)
-        file.write("\n")
-        file.close()
-        file = open('%s.txt' % userName, "a+")
-        file.seek(0)
-        original = file.read()
-        file.truncate(0)
-        encrypted = cryptocode.encrypt(original, password)
-        file.write(encrypted)
-        file.close()
-        print("Contact Added. ")
-        return
-    else:
-        file = open('%s.txt' % userName, "a+")
-        file.seek(0)
-        encrypted = file.read()
-        file.truncate(0)
-        file.close()
-        decrypted = cryptocode.decrypt(encrypted, password)
-        file = open('%s.txt' % userName, "a+")
-        name = input("Enter Contact Name: ")
-        emailAddress = input("Enter Email Address: ")
-        file.write(decrypted)
-        file.write(name)
-        file.write("          ")
-        file.write(emailAddress)
-        file.write("\n")
-        file.seek(0)
-        original = file.read()
-        file.truncate(0)
-        encrypted = cryptocode.encrypt(original, password)
-        file.write(encrypted)
-        file.close()
-        print("Contact Added. ")
-        return
-
-
-
 #User terminal to define the commands entered such as 'help' and 'add', etc...
 def userTerminal(userName, password):
     print("Welcome to SecureDrop.")
@@ -252,6 +201,52 @@ def list(userName, password):
         file.close()
         decrypted = cryptocode.decrypt(encrypted, password)
         print(decrypted)
+        return
+
+
+#Add user command which gives the user their own data file to store emails and contact names with a cryptocode encrypt funciton
+def add(userName, password):
+    # new contacts file for user
+    if os.path.exists('%s.txt' % userName) == False:
+        name = input("Enter Full Name: ")
+        emailAddress = input("Enter Email Address: ")
+        file = open('%s.txt' % userName, "a+")
+        file.write(name)
+        file.write("          ")
+        file.write(emailAddress)
+        file.write("\n")
+        file.close()
+        file = open('%s.txt' % userName, "a+")
+        file.seek(0)
+        original = file.read()
+        file.truncate(0)
+        encrypted = cryptocode.encrypt(original, password)
+        file.write(encrypted)
+        file.close()
+        print("Contact Added. ")
+        return
+    else:
+        file = open('%s.txt' % userName, "a+")
+        file.seek(0)
+        encrypted = file.read()
+        file.truncate(0)
+        file.close()
+        decrypted = cryptocode.decrypt(encrypted, password)
+        file = open('%s.txt' % userName, "a+")
+        name = input("Enter Contact Name: ")
+        emailAddress = input("Enter Email Address: ")
+        file.write(decrypted)
+        file.write(name)
+        file.write("          ")
+        file.write(emailAddress)
+        file.write("\n")
+        file.seek(0)
+        original = file.read()
+        file.truncate(0)
+        encrypted = cryptocode.encrypt(original, password)
+        file.write(encrypted)
+        file.close()
+        print("Contact Added. ")
         return
 
 
