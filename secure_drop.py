@@ -70,12 +70,6 @@ def register():
 #Login will direct you to reigster if no users exists otherwise it will ask for a username and password that will bring you to the userTerminal
 def login():
 
-
-
-
-
-
-
     userName = input("Please enter your username or \"exit\" to quit: ")
 
     if userName == 'exit':

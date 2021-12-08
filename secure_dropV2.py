@@ -2,21 +2,19 @@
 # pip install cryptocode
 # pip install pycryptodome
 # Then hit run
+import colorama
+from colorama import Fore, Style
 import webview
+import enum
 import secrets
 import os.path
 import sys
 from Crypto.Hash import SHA256
 from getpass import getpass
+import subprocess
 import cryptocode
 import socket
 import json
-
-#could use a 2d array but I dont hate myself
-class contacts:
-    def __init__(self, contactNames, contactEmails):
-        self.contactNames = []
-        self.contactEmails =[]
 
 class user:
     def __init__(self, name, email, password, salt):
@@ -25,10 +23,51 @@ class user:
         self.password = password
         self.salt = salt
 
+class contact:
+    def __init__(self):
+        self.name = []
+        self.email = []
+        self.online = False
+
+class onlineStatus(enum.Enum):
+    online = 'online'
+    offline = 'offline'
+
+def getUserContacts(userAccount):
+    if (os.path.exists('%s.name.txt' % userAccount.email) == False) and (os.path.exists('%s.email.txt' % userAccount.email) == False):
+        myName = open('%s.name.txt' % userAccount.email, "a+")
+        myEmail = open('%s.email.txt' % userAccount.email, "a+")
+        userC = contact()
+        return userC
+
+    if (os.stat('%s.name.txt' % userAccount.email).st_size == 0) and (os.stat('%s.email.txt' % userAccount.email).st_size == 0):
+        userC = contact()
+        return userC
+    else:
+        print("getting here in else")
+        myName = open('%s.name.txt' % userAccount.email, "r+")
+        myEmail = open('%s.email.txt' % userAccount.email, "r+")
+
+    userC = contact()   #Creating contact object to interact with the user terminal
+
+    jsonName = json.load(myName)
+    jsonEmail = json.load(myEmail)
+    for x in range((len(jsonName["name"]))):
+         userC.name.append((jsonName["name"][x]))
+    for x in range((len(jsonEmail["email"]))):
+        userC.email.append((jsonEmail["email"][x]))
+    myName.close()
+    myEmail.close()
+    return userC
+
+
+
+
+
 def loadAccount():
     with open("accountfile.txt", "r") as jsonFile:
-        data = json.load(jsonFile)
-        userAccount = user(data["name"], data["email"], data["password"], data["salt"])
+        myJson = json.load(jsonFile)
+        userAccount = user(myJson["name"], myJson["email"], myJson["password"], myJson["salt"])
         return userAccount
 
 #Check if accountfile.txt exists
@@ -94,31 +133,7 @@ def register():
                 json.dump(vars(newUser), jsonFile)
             return
 
-#Login will direct you to reigster if no users exists otherwise it will ask for a username and password that will bring you to the userTerminal
-def login():
 
-    userAccount = loadAccount()
-
-    userName = input("Please enter your email or \"quit\" to exit: ")
-
-    if userName == 'quit':
-        _exit()
-
-    else:
-        password = getpass("Enter Password: ").rstrip(' ')
-
-    print("Username entered", userName)
-    print("username in the object", userAccount.name)
-
-    if userName == userAccount.email:
-
-        encryptedPassword = encrypt(password + userAccount.salt).hexdigest()
-
-    if encryptedPassword == userAccount.password:
-            userTerminal(userName, password)
-    else:
-        print("\nIncorrect username or password. ")
-        login()
 
 
 #Welcoem screen that dictates if you want to register or login into secure drop
@@ -147,22 +162,44 @@ def welcomeScreen():
         welcomeScreen()
 
 
+#Login will direct you to reigster if no users exists otherwise it will ask for a username and password that will bring you to the userTerminal
+def login():
+
+    userAccount = loadAccount()
+
+    userName = input("Please enter your email or \"quit\" to exit: ")
+
+    if userName == 'quit':
+        _exit()
+    else:
+        password = getpass("Enter Password: ").rstrip(' ')
+
+    if userName == userAccount.email:
+
+        encryptedPassword = encrypt(password + userAccount.salt).hexdigest()
+
+    if encryptedPassword == userAccount.password:
+            userTerminal(userAccount)
+    else:
+        print("\nIncorrect username or password. ")
+        login()
+
 #User terminal to define the commands entered such as 'help' and 'add', etc...
-def userTerminal(userName, password):
+def userTerminal(userAccount):
+    userC = getUserContacts(userAccount) #Create user contact
     print("Welcome to SecureDrop.")
     print("Type \"help\" For Commands.\n")
-
 
     while (True):
         userInput = input("secure_drop> ")
         if userInput == 'add':
-            add(userName, password)
+            userC = add(userAccount, userC)
         elif userInput == 'send':
             send()
         elif userInput == 'exit':
             _exit()
         elif userInput == 'list':
-            list(userName, password)
+            list(userC)
         elif userInput == 'help':
             help()
         else:
@@ -194,69 +231,43 @@ def send():
 
     return
 
-def list(userName, password):
-    if os.stat('%s.txt' % userName).st_size == 0:
-        print("No Contacts Associated with this User")
-        return
-    else:
+def list(userC):
         print("Contacts:")
-        print("Name:         Email:")
-        file = open('%s.txt' % userName, "r+")
-        file.seek(0)
-        encrypted = file.read()
-        file.close()
-        decrypted = cryptocode.decrypt(encrypted, password)
-        print(decrypted)
-        return
+        for x in range(len(userC.name)):
 
+            if(userC.online == "True"):
+                print("Name:", userC.name[x],"\tEmail:", userC.email[x], Fore.GREEN + "\tonline", Fore.RESET + "" )
+            else:
+
+                print("Name:", userC.name[x],"\tEmail:", userC.email[x], Fore.RED + "\toffline", Fore.RESET + "")
+        return
 
 #Add user command which gives the user their own data file to store emails and contact names with a cryptocode encrypt funciton
-def add(userName, password):
-    # new contacts file for user
-    if os.path.exists('%s.txt' % userName) == False:
-        name = input("Enter Full Name: ")
-        emailAddress = input("Enter Email Address: ")
-        file = open('%s.txt' % userName, "a+")
-        file.write(name)
-        file.write("          ")
-        file.write(emailAddress)
-        file.write("\n")
-        file.close()
-        file = open('%s.txt' % userName, "a+")
-        file.seek(0)
-        original = file.read()
-        file.truncate(0)
-        encrypted = cryptocode.encrypt(original, password)
-        file.write(encrypted)
-        file.close()
+def add(userAccount, userC):
+    # creating new contacts file for user if one does not exist with 'userAccount.email'.txt as the structure
+    if ((os.stat('%s.name.txt' % userAccount.email).st_size == 0) and (os.stat('%s.email.txt' % userAccount.email) == 0)):
+        myName = open('%s.name.txt' % userAccount.email, "r+")
+        myEmail = open('%s.email.txt' % userAccount.email, "r+")
+        userC.name.append(input("Enter Full Name: "))
+        userC.email.append(input("Enter Email Address: "))
+        json.dump({'name': userC.name}, myName)
+        json.dump({'email': userC.email}, myEmail)
         print("Contact Added. ")
-        return
+        myName.close()
+        myEmail.close()
+        return userC
     else:
-        file = open('%s.txt' % userName, "a+")
-        file.seek(0)
-        encrypted = file.read()
-        file.truncate(0)
-        file.close()
-        decrypted = cryptocode.decrypt(encrypted, password)
-        file = open('%s.txt' % userName, "a+")
-        name = input("Enter Contact Name: ")
-        emailAddress = input("Enter Email Address: ")
-        file.write(decrypted)
-        file.write(name)
-        file.write("          ")
-        file.write(emailAddress)
-        file.write("\n")
-        file.seek(0)
-        original = file.read()
-        file.truncate(0)
-        encrypted = cryptocode.encrypt(original, password)
-        file.write(encrypted)
-        file.close()
+        print("getting here")
+        myName = open('%s.name.txt' % userAccount.email, "r+")
+        myEmail = open('%s.email.txt' % userAccount.email, "r+")
+        myName.truncate(0)
+        myEmail.truncate(0)
+        userC.name.append(input("Enter Full Name: "))
+        userC.email.append(input("Enter Email Address: "))
+        json.dump({'name': userC.name}, myName)
+        json.dump({'email': userC.email}, myEmail)
         print("Contact Added. ")
-        return
-
-
-
+        return userC
 
 
 def socketStart():
