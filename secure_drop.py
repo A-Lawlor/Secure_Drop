@@ -9,8 +9,9 @@ import sys
 from Crypto.Hash import SHA256
 from getpass import getpass
 import cryptocode
-from cryptography.fernet import Fernet
 import socket
+import json
+from cryptography.fernet import Fernet
 
 #Check if accountfile.txt exists
 def accountFileExists():
@@ -68,6 +69,13 @@ def register():
 
 #Login will direct you to reigster if no users exists otherwise it will ask for a username and password that will bring you to the userTerminal
 def login():
+
+
+
+
+
+
+
     userName = input("Please enter your username or \"exit\" to quit: ")
 
     if userName == 'exit':
@@ -81,6 +89,10 @@ def login():
     login_info = login_info.split(" ")  # Split on the space, and store the results in a list of two strings
 
     if userName in login_info:
+
+
+
+
 
         i = login_info.index(userName)
         compare = login_info[i + 1]
@@ -144,7 +156,7 @@ def help():
 def add(userName, password):
     # new contacts file for user
     if os.path.exists('%s.txt' % userName) == False:
-        name = input("Enter Contact Name: ")
+        name = input("Enter Full Name: ")
         emailAddress = input("Enter Email Address: ")
         file = open('%s.txt' % userName, "a+")
         file.write(name)
@@ -185,11 +197,10 @@ def add(userName, password):
         print("Contact Added. ")
         return
 
-def send():
-    print("Select File to SecureDrop")
-
-    def webview_file_dialog(): #Opens user select file window
+def selectFile():
+    def webview_file_dialog():  # Opens user select file window
         pathtofile = None
+
         def open_file_dialog(w):
             nonlocal pathtofile
             try:
@@ -198,12 +209,16 @@ def send():
                 pass  # Exit select box without picking
             finally:
                 w.destroy()
+
         window = webview.create_window("", hidden=True)
         webview.start(open_file_dialog, window)
         # file will either be a string or None
         return pathtofile
 
-    path = webview_file_dialog()
+def send():
+    print("Select File to SecureDrop")
+
+    path =selectFile()
     text = open('%s' % webview_file_dialog(), "r+")
     print(webview_file_dialog())
     webview_file_dialog()
@@ -231,11 +246,11 @@ def list(userName, password):
 #User terminal to define the commands entered such as 'help' and 'add', etc...
 def userTerminal(userName, password):
     print("Welcome to SecureDrop.")
-    print("Type \"help\" For Commands. ")
+    print("Type \"help\" For Commands.\n")
+
 
     while (True):
         userInput = input("secure_drop> ")
-
         if userInput == 'add':
             add(userName, password)
         elif userInput == 'send':
@@ -250,11 +265,35 @@ def userTerminal(userName, password):
             print("Invalid command. ")
             # eval(userInput+'()')
 
-#Run Server Code
-s = socket.socket()
-port = 4444
 
-s.connect(('129.63.248.16', port))
-print (s.recv(1024).decode())
-#Run the welcome screen function to start off the program
+def socketStart():
+    HOST = '127.0.0.1'  # Symbolic name, meaning all available interfaces
+    PORT = 8889  # Arbitrary non-privileged port
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print('Socket created')
+
+    # Bind socket to local host and port
+    try:
+        s.bind((HOST, PORT))
+    except socket.error as msg:
+        print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1])
+        sys.exit()
+
+    print('Socket bind complete')
+
+    # Start listening on socket
+    s.listen(10)
+    print('Socket now listening')
+
+    # now keep talking with the client
+    while 1:
+        # wait to accept a connection - blocking call
+        conn, addr = s.accept()
+        selectFile()
+        print('Connected with ' + addr[0] + ':' + str(addr[1]))
+    s.close()
+
+#Run the welcome screen function to start off the program#
+#socketStart()
 welcomeScreen()
