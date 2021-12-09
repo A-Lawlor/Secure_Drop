@@ -221,6 +221,7 @@ def __exit(H):
     print("Successful logged out of secure drop. ")
     sys.exit()
 
+
 #Help command print out for secure drop terminal
 def help():
     print("\"add\" -> Add a new contact")
