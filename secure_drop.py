@@ -2,7 +2,7 @@
 # pip install cryptocode
 # pip install pycryptodome
 # Then hit run
-import colorama
+import signal
 from colorama import Fore, Style
 import webview
 import enum
@@ -19,6 +19,7 @@ import os.path
 import tqdm
 import os
 import hashlib
+from threading import Thread
 
 
 class user:
@@ -219,8 +220,7 @@ def userTerminal(userAccount):
 #Exit secure drop terminal
 def __exit(H):
     print("Successful logged out of secure drop. ")
-    sys.exit()
-
+    os.kill(os.getpid(), signal.SIGUSR1)
 
 #Help command print out for secure drop terminal
 def help():
