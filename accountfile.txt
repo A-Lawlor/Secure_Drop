@@ -1,1 +1,0 @@
-{"name": "Anthony", "email": "anthony@gmail.com", "password": "35b6381c9d555bfb278b9d4fdd87dd4c21e02626716bb63fd699112d0e83b307", "salt": "fbe09fe52e25914d"}
