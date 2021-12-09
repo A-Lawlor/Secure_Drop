@@ -20,7 +20,6 @@ import tqdm
 import os
 import hashlib
 
-
 class user:
     def __init__(self, name, email, password, salt):
         self.name = name
