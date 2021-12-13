@@ -3,7 +3,7 @@
 # pip install pycryptodome
 # Then hit run
 import signal
-from colorama import Fore, Style
+from colorama import Fore
 import webview
 import enum
 import secrets
@@ -19,8 +19,6 @@ import os.path
 import tqdm
 import os
 import hashlib
-from threading import Thread
-
 
 class user:
     def __init__(self, name, email, password, salt):
@@ -336,7 +334,6 @@ def socketHost(ip, port):
     SERVER_PORT = port
     BUFFER_SIZE = 4096
     SEPARATOR = "<SEPARATOR>"
-
     s = socket.socket()
     s.bind((SERVER_HOST, SERVER_PORT))
     s.listen(10)
@@ -386,7 +383,6 @@ def socketClient(path, portConnect, userAccount):
         host = "127.0.0.1"
         port = portConnect
         s.connect((host, port))
-
         filename = path
         data = userAccount.email
         data = str(data)
@@ -404,11 +400,9 @@ def socketClient(path, portConnect, userAccount):
             progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
 
             with open(filename, "rb") as f:
-
                 while True:
 
                     bytes_read = f.read(BUFFER_SIZE)
-
                     if not bytes_read:
                         break
 
