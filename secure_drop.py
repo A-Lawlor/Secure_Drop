@@ -264,7 +264,7 @@ def send(userAccount, userC):
 
     else:
         print("Invalid Contact")
-        user
+        return
 
 def list(userC):
         print("Contacts:")
