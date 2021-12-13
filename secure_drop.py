@@ -214,6 +214,8 @@ def userTerminal(userAccount):
             list(userC)
         elif userInput == 'help':
             help()
+        elif userInput == 'remove':
+            removeContact(userAccount,userC)
 
 #Exit secure drop terminal
 def __exit(H):
@@ -328,6 +330,38 @@ def add(userAccount, userC):
         myPort.close()
         print("Contact Added. ")
         return userC
+
+def removeContact(userAccount, userC):
+    removeEmail = input("Enter email of contact you want to remove: ")
+    if(removeEmail in userC.email):
+        index = userC.email.index(removeEmail)
+        userC.name.pop(index)
+        userC.email.pop(index)
+        userC.port.pop(index)
+        myName = open('%s.name.txt' % userAccount.email, "r+")
+        myEmail = open('%s.email.txt' % userAccount.email, "r+")
+        myPort = open('%s.port.txt' % userAccount.email, "r+")
+        myName.truncate(0)
+        myEmail.truncate(0)
+        myPort.truncate(0)
+        eName = json.dumps({'name': userC.name})
+        eEmail = json.dumps({'email': userC.email})
+        ePort = json.dumps({'port': userC.port})
+        eName = cryptocode.encrypt(eName, userAccount.password)
+        eEmail = cryptocode.encrypt(eEmail, userAccount.password)
+        ePort = cryptocode.encrypt(ePort, userAccount.password)
+        myName.write(eName)
+        myEmail.write(eEmail)
+        myPort.write(ePort)
+        myName.close()
+        myEmail.close()
+        myPort.close()
+        print("Contact " + removeEmail + " Removed")
+        return
+    else:
+        print("Contact not found")
+        return
+
 
 def socketHost(ip, port):
     SERVER_HOST = ip
